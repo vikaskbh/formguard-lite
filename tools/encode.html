@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FormGuard Encoder</title>
+<style>
+  :root { --bg:#fafaf7; --fg:#1d1d1b; --mut:#666; --line:#ddd; --acc:#0b6b5c; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#161615; --fg:#ecece8; --mut:#999; --line:#333; --acc:#4fc3ad; } }
+  body { margin:0; background:var(--bg); color:var(--fg); font:15px/1.5 system-ui, sans-serif; }
+  main { max-width:720px; margin:40px auto; padding:0 16px; }
+  h1 { font-size:22px; margin:0 0 4px; }
+  p { color:var(--mut); margin:0 0 20px; }
+  label { display:block; font-weight:600; margin:14px 0 4px; }
+  input, textarea { width:100%; box-sizing:border-box; padding:8px 10px; border:1px solid var(--line); border-radius:6px; background:transparent; color:inherit; font:13px ui-monospace, monospace; }
+  textarea { height:110px; resize:vertical; }
+  .row { display:flex; gap:8px; } .row input { flex:1; }
+  button { padding:8px 14px; border:0; border-radius:6px; background:var(--acc); color:#fff; font-weight:600; cursor:pointer; }
+  #ok { color:var(--acc); font-size:13px; min-height:1.2em; margin-top:6px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>FormGuard encoder</h1>
+  <p>Runs entirely in this page. Nothing is sent anywhere. Paste the output onto your &lt;form&gt;.</p>
+
+  <label for="url">Form action URL</label>
+  <input id="url" placeholder="https://api.example.com/forms/82/subscribe/…">
+
+  <label for="key">Key (any short string, random by default)</label>
+  <div class="row"><input id="key"><button id="rk" type="button">New key</button></div>
+
+  <label for="out">Attributes for your &lt;form&gt;</label>
+  <textarea id="out" readonly></textarea>
+  <div class="row" style="margin-top:8px"><button id="copy" type="button">Copy</button></div>
+  <div id="ok"></div>
+</main>
+<script src="../formguard.js"></script>
+<script>
+  var $ = function (id) { return document.getElementById(id); };
+  function newKey() {
+    var a = new Uint8Array(6); crypto.getRandomValues(a);
+    $("key").value = btoa(String.fromCharCode.apply(null, a)).replace(/[+/=]/g, "").slice(0, 8);
+  }
+  function run() {
+    var u = $("url").value.trim(), k = $("key").value;
+    if (!u || !k) { $("out").value = ""; $("ok").textContent = ""; return; }
+    var e = FormGuard.encode(u, k);
+    var good = FormGuard.decode(e, k) === u;
+    $("out").value = 'data-formguard data-fg-action="' + e + '" data-fg-key="' + k + '"';
+    $("ok").textContent = good ? "Round-trip verified." : "Round-trip FAILED. Do not use.";
+  }
+  newKey();
+  $("url").addEventListener("input", run);
+  $("key").addEventListener("input", run);
+  $("rk").addEventListener("click", function () { newKey(); run(); });
+  $("copy").addEventListener("click", function () {
+    $("out").select();
+    (navigator.clipboard ? navigator.clipboard.writeText($("out").value) : Promise.resolve(document.execCommand("copy")))
+      .then(function () { $("ok").textContent = "Copied."; });
+  });
+</script>
+</body>
+</html>

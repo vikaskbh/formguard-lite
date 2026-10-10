@@ -1,0 +1,16 @@
+{
+  "name": "formguard-lite",
+  "version": "1.0.0",
+  "description": "Stateless, zero-dependency spam guard for plain HTML forms: honeypot, time trap, interaction gate, canvas captcha, obfuscated action.",
+  "main": "formguard.js",
+  "files": ["formguard.js", "dist/", "tools/"],
+  "scripts": {
+    "build": "npx -y terser@5 formguard.js -c -m --comments '/^!/' -o dist/formguard.min.js",
+    "encode": "node tools/encode.js",
+    "test": "node test/codec.test.js && node test/dom.test.js && FG_FILE=dist/formguard.min.js node test/dom.test.js"
+  },
+  "devDependencies": { "jsdom": "^24.0.0" },
+  "keywords": ["captcha", "honeypot", "spam", "form", "static-site", "no-backend", "jugaad"],
+  "author": "Vikas Bhagwagar (https://github.com/vikaskbh)",
+  "license": "MIT"
+}

@@ -1,0 +1,27 @@
+<!-- FormGuard: Maropost newsletter box (posts into a hidden iframe, page stays put)
+     1. Encode your Maropost subscribe URL: node tools/encode.js "https://api.maropost.com/accounts/XX/forms/YY/subscribe/TOKEN"
+     2. Paste the printed data-fg-action / data-fg-key below.
+     3. Load formguard once per page (end of <body> is fine). -->
+
+<iframe name="mp_sink" style="display:none" title="subscription"></iframe>
+
+<form data-formguard
+      data-fg-action="PASTE_ENCODED_ACTION" data-fg-key="PASTE_KEY"
+      data-fg-success="#mp-thanks" target="mp_sink" accept-charset="UTF-8">
+  <label>First Name: <input type="text" name="contact_fields[first_name]" autocomplete="given-name"></label><br>
+  <label>Your E-Mail: <input type="email" name="contact_fields[email]" autocomplete="email" required></label>
+
+  <!-- Keep whatever hidden fields your Maropost form needs -->
+  <input type="hidden" name="category1" value="yoursite">
+  <input type="hidden" name="confirmation" value="https://yoursite.com/thanks.html">
+  <input type="hidden" name="ref" value="999">
+  <input type="hidden" name="getpostdata" value="get">
+
+  <button type="submit">Email me my free bonuses!</button>
+</form>
+
+<div id="mp-thanks" style="display:none">
+  <p>Thanks! Your report will arrive within 20 minutes. Check your spam folder too.</p>
+</div>
+
+<script src="https://cdn.jsdelivr.net/gh/vikaskbh/formguard-lite@v1.0.0/dist/formguard.min.js"></script>

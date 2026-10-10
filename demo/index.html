@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FormGuard Demo</title>
+<style>
+  body { font:15px/1.5 system-ui, sans-serif; max-width:640px; margin:40px auto; padding:0 16px; color:#1d1d1b; background:#fafaf7; }
+  form, .card { border:1px solid #ddd; border-radius:8px; padding:16px; margin:0 0 28px; background:#fff; }
+  label { display:block; margin:8px 0 2px; font-weight:600; }
+  input[type=text], input[type=email], textarea { width:100%; box-sizing:border-box; padding:6px 8px; }
+  button[type=submit] { margin-top:10px; padding:8px 14px; }
+  code { background:#eee; padding:1px 4px; border-radius:3px; }
+</style>
+</head>
+<body>
+<h1>FormGuard demo</h1>
+<p>Both forms post to <code>httpbin.org/post</code>, which echoes the payload back. Neither URL appears in this page's HTML.</p>
+
+<!-- 1. Newsletter style: posts into a hidden iframe, page stays put -->
+<h2>1. Newsletter (hidden iframe)</h2>
+<iframe name="fg_sink" style="display:none" title="submission sink"></iframe>
+<form id="news" data-formguard
+      data-fg-action="EBYCHx5VQQtLAwZTQkcQDUJAC0FDEBEF" data-fg-key="demo123"
+      data-fg-success="#news-thanks" target="fg_sink">
+  <label>First name <input type="text" name="contact_fields[first_name]" required></label>
+  <label>Email <input type="email" name="contact_fields[email]" required></label>
+  <input type="hidden" name="ref" value="999">
+  <button type="submit">Email me the free report</button>
+</form>
+<div id="news-thanks" class="card" style="display:none">Thanks. Check your inbox in a few minutes.</div>
+
+<!-- 2. Contact style: normal navigation to the endpoint's response, captcha placed explicitly -->
+<h2>2. Contact form (normal post)</h2>
+<form data-formguard data-fg-action="EBYCHx5VQQtLAwZTQkcQDUJAC0FDEBEF" data-fg-key="demo123"
+      data-fg-silent="false" data-fg-label="Quick check: solve the sum">
+  <label>Name <input type="text" name="name" required></label>
+  <label>Email <input type="email" name="email" required></label>
+  <label>Message <textarea name="message" rows="4" required></textarea></label>
+  <div data-fg-captcha></div>
+  <button type="submit">Send</button>
+</form>
+
+<script src="../formguard.js"></script>
+<script>
+  document.addEventListener("formguard:blocked", function (e) { console.log("[FormGuard] blocked:", e.detail.reason); });
+  document.addEventListener("formguard:pass", function (e) { console.log("[FormGuard] passed:", e.target.id || e.target); });
+</script>
+</body>
+</html>
