@@ -172,4 +172,4 @@ npm run build    # regenerate dist/formguard.min.js and dist/react.mjs
 
 ## License
 
-MIT © Vikas Bhagwagar · a [CloudJugaad](https://cloudjugaad.com) utility
+MIT © Vikas Bhagwagar · a [vikaskbh.com](https://vikaskbh.com) utility
