@@ -1,16 +1,52 @@
 {
   "name": "formguard-lite",
-  "version": "1.0.0",
-  "description": "Stateless, zero-dependency spam guard for plain HTML forms: honeypot, time trap, interaction gate, canvas captcha, obfuscated action.",
+  "version": "1.1.0",
+  "description": "Stateless, zero-dependency spam guard for plain HTML forms and React: honeypot, time trap, interaction gate, canvas captcha, obfuscated action.",
   "main": "formguard.js",
-  "files": ["formguard.js", "dist/", "tools/"],
+  "files": [
+    "formguard.js",
+    "dist/",
+    "tools/",
+    "react/"
+  ],
   "scripts": {
-    "build": "npx -y terser@5 formguard.js -c -m --comments '/^!/' -o dist/formguard.min.js",
+    "build": "npx -y terser@5 formguard.js -c -m --comments '/^!/' -o dist/formguard.min.js && npx esbuild react/FormGuard.jsx --format=esm --jsx=automatic --target=es2019 --legal-comments=inline --outfile=dist/react.mjs",
     "encode": "node tools/encode.js",
-    "test": "node test/codec.test.js && node test/dom.test.js && FG_FILE=dist/formguard.min.js node test/dom.test.js"
+    "test": "node test/codec.test.js && node test/dom.test.js && FG_FILE=dist/formguard.min.js node test/dom.test.js && node test/run-react.js"
   },
-  "devDependencies": { "jsdom": "^24.0.0" },
-  "keywords": ["captcha", "honeypot", "spam", "form", "static-site", "no-backend", "jugaad"],
+  "devDependencies": {
+    "esbuild": "^0.24.0",
+    "jsdom": "^24.0.0",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0"
+  },
+  "keywords": [
+    "captcha",
+    "honeypot",
+    "spam",
+    "form",
+    "static-site",
+    "no-backend",
+    "jugaad",
+    "react"
+  ],
   "author": "Vikas Bhagwagar (https://github.com/vikaskbh)",
-  "license": "MIT"
+  "license": "MIT",
+  "exports": {
+    ".": "./formguard.js",
+    "./react": {
+      "types": "./react/index.d.ts",
+      "import": "./dist/react.mjs",
+      "default": "./dist/react.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "peerDependencies": {
+    "react": ">=17"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
+  }
 }

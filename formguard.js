@@ -1,5 +1,5 @@
 /*!
- * FormGuard v1.0.0 — stateless, client-side spam guard for plain HTML forms.
+ * FormGuard v1.1.0 — stateless, client-side spam guard for plain HTML forms.
  * Honeypot + time trap + interaction gate + canvas arithmetic captcha
  * + obfuscated form action (never present in the HTML).
  * No server, no cookies, no third-party calls. MIT License.
@@ -286,7 +286,7 @@
     return Array.prototype.map.call(document.querySelectorAll(selectorOrEl), function (f) { return guard(f, opts); });
   }
 
-  var FormGuard = { init: init, encode: encode, decode: decode, version: "1.0.0" };
+  var FormGuard = { init: init, encode: encode, decode: decode, version: "1.1.0" };
 
   if (typeof module === "object" && module.exports) module.exports = FormGuard;
   if (root && root.document) {

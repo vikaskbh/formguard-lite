@@ -4,14 +4,14 @@
 
 Built for stateless CMSs, static hosts and landing-page builders where you can paste HTML/JS but can't run server code, add reCAPTCHA keys, or verify anything on the backend. It's typical for forms that post straight to a third-party endpoint (Maropost, Mailchimp, Formspree, Google Forms, a legacy PHP script).
 
-One script tag, one attribute on your `<form>`. No dependencies, no cookies, no third-party calls. 7.5 KB minified, 3.3 KB gzipped.
+One script tag, one attribute on your `<form>`. No dependencies, no cookies, no third-party calls. 7.5 KB minified, 3.3 KB gzipped. A native [React adapter](#react) is included.
 
 ```html
 <form data-formguard data-fg-action="EBYCHx5VQQtLAwZTQkcQDUJAC0FDEBEF" data-fg-key="demo123">
   <input type="email" name="email" required>
   <button type="submit">Subscribe</button>
 </form>
-<script src="https://cdn.jsdelivr.net/gh/vikaskbh/formguard-lite@v1.0.0/dist/formguard.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/vikaskbh/formguard-lite@v1.1.0/dist/formguard.min.js"></script>
 ```
 
 ## What it does
@@ -85,6 +85,71 @@ document.addEventListener("formguard:locked",  e => {/* too many wrong answers *
 
 Try `demo/index.html`. It posts to httpbin.org, which echoes the payload back.
 
+## React
+
+`react/FormGuard.jsx` is a native React version of the same guard. It never mutates React-owned DOM and is SSR-safe (Next.js App Router, Remix, Vite). It's one self-contained file with the same codec, so the same `tools/encode` output works. Either:
+
+- **copy** `react/FormGuard.jsx` into your app, or
+- **import** from the package: `import { GuardedForm, Captcha } from "formguard-lite/react"` (compiled ESM in `dist/react.mjs`, types in `react/index.d.ts`).
+
+### Drop-in form (native post to a third-party endpoint)
+
+```jsx
+import { GuardedForm, Captcha } from "formguard-lite/react";
+
+<iframe name="sink" style={{ display: "none" }} title="sink" />
+<GuardedForm action="ENCODED" actionKey="KEY" target="sink" success={<p>Thanks!</p>}>
+  <input name="contact_fields[email]" type="email" required />
+  <Captcha />
+  <button type="submit">Subscribe</button>
+</GuardedForm>
+```
+
+### Your own API (fetch)
+
+```jsx
+<GuardedForm
+  action="ENCODED" actionKey="KEY"
+  onPass={async ({ url, formData }) => {
+    const r = await fetch(url, { method: "POST", body: formData });
+    if (!r.ok) throw new Error("Couldn't send, try again"); // shown in the captcha error line
+  }}
+  success={<p>Sent.</p>}
+>
+  {({ pending, locked }) => (<>
+    <input name="email" type="email" required />
+    <Captcha />
+    <button disabled={pending || locked}>{pending ? "Sending…" : "Send"}</button>
+  </>)}
+</GuardedForm>
+```
+
+### Headless hook (react-hook-form, Formik, anything)
+
+```jsx
+const guard = useFormGuard({ minTime: 4000 });
+<form onSubmit={(e) => { e.preventDefault(); if (guard.verify().ok) send(); }}>
+  <Honeypot guard={guard} />
+  <Captcha guard={guard} />
+  …
+</form>
+```
+
+| `<GuardedForm>` prop | Meaning |
+|---|---|
+| `action` + `actionKey` / `plainAction` | Endpoint (encoded or plain) |
+| `onPass({ url, formData, form })` | Send it yourself; omit for a native post. Async OK; throw to show an error and allow retry |
+| `success` | Node rendered in place of the form afterwards |
+| `onSuccess()`, `onBlocked(reason)` | Callbacks |
+| `silent` | Default `true`: bots see success |
+| `guard` | `{ minTime, minInteractions, maxTries, captcha, honeypot, label, errWrong, errLocked }` |
+| `children` | Nodes, or `({ pending, error, locked, guard }) => nodes` |
+| anything else | Passed to `<form>` (`target`, `className`, `acceptCharset`…) |
+
+Place `<Captcha />` wherever the puzzle should appear. It also shows errors. `<Honeypot />` is added automatically by `<GuardedForm>`. More in `react/example.jsx`.
+
+> In `onPass` mode the decoded URL ends up in your fetch call, visible in the browser's network tab like any endpoint. That's fine: the goal is keeping it out of HTML and JS-bundle string searches, not hiding it from someone watching their own requests.
+
 ## Honest limits
 
 FormGuard is a **client-side filter**. With no server to verify a token, nothing here is cryptographically enforced:
@@ -100,9 +165,9 @@ In practice almost all form spam is harvested-URL posting and dumb autofill bots
 ## Development
 
 ```bash
-npm i            # jsdom for tests
-npm test         # codec + DOM tests (source and minified build)
-npm run build    # regenerate dist/formguard.min.js
+npm i            # jsdom, React, esbuild for tests
+npm test         # codec + DOM (source and minified) + React adapter tests
+npm run build    # regenerate dist/formguard.min.js and dist/react.mjs
 ```
 
 ## License
